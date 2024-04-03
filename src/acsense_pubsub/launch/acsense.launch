@@ -1,0 +1,18 @@
+<launch>
+    <arg name="robot_name" default="warpauv_3"/>
+    <arg name="output" default="log"/>
+
+    <arg name="udp_args" default="--use-mcast --iface-ip=192.168.1.115"/>
+
+     <group ns="$(arg robot_name)/sensors/audio">
+        <node pkg="acsense_pubsub" type="acsense_publisher.py"
+            name="acsense_publisher" output="$(arg output)"
+            args="$(arg udp_args)">
+            <param name="robot_name" value="$(arg robot_name)"/>
+        </node>
+        <node pkg="acsense_pubsub" type="acsense_subscriber.py"
+            name="acsense_subscriber" output="screen">
+            <param name="robot_name" value="$(arg robot_name)"/>
+        </node>
+     </group>
+</launch>

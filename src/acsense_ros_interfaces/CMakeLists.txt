@@ -1,35 +1,36 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.0.2)
 project(acsense_ros_interfaces)
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
+## Compile as C++11, supported in ROS Kinetic and newer
+# add_compile_options(-std=c++11)
 
-# find dependencies
-find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+## Find catkin macros and libraries
+## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
+## is used, also find other catkin packages
+find_package(catkin REQUIRED COMPONENTS
+        roscpp
+        roslib
+        rospy
+        std_msgs
+        message_generation
+        )
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
-  set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
+add_message_files(
+        FILES
+        AcSenseRawData.msg
+        AcSenseRawDataSingleChannel.msg
+)
 
+generate_messages(DEPENDENCIES std_msgs)
 
-find_package(rosidl_default_generators REQUIRED)
-
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/AcSenseRawData.msg"
-  "msg/AcSenseRawDataSingleChannel.msg"
+catkin_package(
+        CATKIN_DEPENDS roscpp rospy
 )
 
 
-ament_package()
+## Specify additional locations of header files
+## Your package locations should be listed before other locations
+include_directories(
+        # include
+        ${catkin_INCLUDE_DIRS}
+)

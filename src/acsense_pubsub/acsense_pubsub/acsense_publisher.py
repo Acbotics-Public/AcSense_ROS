@@ -1,7 +1,9 @@
-import rclpy
-from rclpy.node import Node
+#!/usr/bin/env python3
 
-from std_msgs.msg import String
+import rospy
+import rospkg
+import sys
+
 from acsense_ros_interfaces.msg import (
     AcSenseRawData,
     AcSenseRawDataSingleChannel,
@@ -14,24 +16,22 @@ import logging
 import argparse
 import traceback
 
-from acbotics_interface.protocols.udp_data_protocol import UDP_Data_Protocol
+pkg_path = rospkg.RosPack().get_path("acsense_pubsub")
+sys.path.append(pkg_path)
 
-logging.basicConfig(
-    # format="[%(asctime)s] %(name)s.%(funcName)s() : \n\t%(message)s",
-    format="[%(asctime)s] %(levelname)s: %(filename)s:L%(lineno)d : %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    level=logging.DEBUG,
-    # level=logging.INFO,
-    force=True,
-)
+from acbotics_interface.protocols.udp_data_protocol import UDP_Data_Protocol
 
 logger = logging.getLogger(__name__)
 
 
-class AcSensePublisher(Node):
+class AcSensePublisher(object):
+    """AcSense UDP-to-ROS relay, publishes acsense_raw_audio"""
+
     def __init__(self, args):
-        super().__init__("minimal_publisher")
-        self.publisher_ = self.create_publisher(AcSenseRawData, "raw_data", 10)
+        super().__init__()
+        self.publisher_ = rospy.Publisher(
+            "acsense_raw_audio", AcSenseRawData, queue_size=10
+        )
 
         logger.info(f"Setting up AcSensePublisher")
 
@@ -62,6 +62,8 @@ class AcSensePublisher(Node):
                 new_header = self.bot.decode_header(msg)
                 new_data = self.bot.decode(msg).data
 
+                # rospy.loginfo(str(new_header))
+
                 msg = AcSenseRawData()
                 msg.ver_maj = new_header.VER_MAJ
                 msg.ver_min = new_header.VER_MIN
@@ -85,17 +87,7 @@ class AcSensePublisher(Node):
 
                 self.publisher_.publish(msg)
 
-                self.get_logger().info(f"Publishing: {new_header.PACKET_NUM}")
-
-                # self.get_logger().info(
-                #     f"Publishing: {new_header.PACKET_NUM}, {new_header.NUM_CHANNELS} ch x {len(ch_data.channel_data)} ({new_header.NUM_VALUES}) values"
-                # )
-
-                # self.get_logger().info(f"{new_header.NUM_CHANNELS}")
-                # self.get_logger().info(f"{new_header.DATA_SIZE}")
-                # self.get_logger().info(f"{new_header.NUM_VALUES}")
-                # self.get_logger().info(f"{new_header.SAMPLE_RATE}")
-                # self.get_logger().info(f"{new_header.START_TIME}")
+                rospy.loginfo(f"Publishing: {new_header.PACKET_NUM}")
 
             except (TimeoutError, socket.timeout) as e:
                 logger.debug(e)
@@ -106,8 +98,16 @@ class AcSensePublisher(Node):
                 continue
 
 
-def main(args=None):
-    rclpy.init(args=args)
+def main():
+    """Entrypoint for AcSense publisher"""
+    logging.basicConfig(
+        # format="[%(asctime)s] %(name)s.%(funcName)s() : \n\t%(message)s",
+        format="[%(asctime)s] %(levelname)s: %(filename)s:L%(lineno)d : %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        level=logging.DEBUG,
+        # level=logging.INFO,
+        force=True,
+    )
 
     parser = argparse.ArgumentParser(
         prog="AcSense Publisher",
@@ -122,15 +122,15 @@ def main(args=None):
     # args = parser.parse_args()
     args, unknown = parser.parse_known_args()
 
-    acsense_publisher = AcSensePublisher(args)
+    rospy.init_node("acsense_publisher")
 
-    rclpy.spin(acsense_publisher)
+    rate = rospy.Rate(50)
 
-    # Destroy the node explicitly
-    # (optional - otherwise it will be done automatically
-    # when the garbage collector destroys the node object)
-    acsense_publisher.destroy_node()
-    rclpy.shutdown()
+    asp = AcSensePublisher(args)
+
+    while not rospy.is_shutdown():
+
+        rate.sleep()
 
 
 if __name__ == "__main__":

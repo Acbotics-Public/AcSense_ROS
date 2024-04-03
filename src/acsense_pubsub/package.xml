@@ -3,11 +3,15 @@
 <package format="3">
   <name>acsense_pubsub</name>
   <version>0.0.0</version>
-  <description>ROS2 pub/sub for Acbotics AcSense</description>
+  <description>ROS1 pub/sub for Acbotics AcSense</description>
   <maintainer email="support@acbotics.com">Acbotics Research LLC</maintainer>
   <license>MIT</license>
 
-  <exec_depend>rclpy</exec_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <build_depend>rospy</build_depend>
+
+  <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
 
   <test_depend>ament_copyright</test_depend>
@@ -16,7 +20,7 @@
   <test_depend>python3-pytest</test_depend>
 
   <export>
-    <build_type>ament_python</build_type>
+    <build_type>catkin</build_type>
   </export>
 
 </package>
