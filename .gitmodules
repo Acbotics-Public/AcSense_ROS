@@ -1,11 +1,11 @@
-[submodule "src/acsense_pubsub/icontract"]
-	path = src/acsense_pubsub/icontract
-	url = https://github.com/Parquery/icontract.git
-	branch = v2.6.6
-[submodule "src/acsense_pubsub/asttokens"]
-	path = src/acsense_pubsub/asttokens
+[submodule "submodules/asttokens"]
+	path = submodules/asttokens
 	url = https://github.com/gristlabs/asttokens.git
 	branch = v2.4.1
-[submodule "src/acsense_pubsub/acbotics_interface"]
-	path = src/acsense_pubsub/acbotics_interface
+[submodule "submodules/icontract"]
+	path = submodules/icontract
+	url = https://github.com/Parquery/icontract.git
+	branch = v2.6.6
+[submodule "submodules/acbotics_interface"]
+	path = submodules/acbotics_interface
 	url = https://github.com/Acbotics-Public/acbotics_interface.git

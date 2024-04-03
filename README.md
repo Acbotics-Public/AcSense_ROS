@@ -18,3 +18,10 @@ The following Python `argparse` parameters are available for the publisher node:
 - `--mcast-group` : sets the value for the UDP multicast group (default: 224.1.1.1)
 - `--iface-ip` : sets the IP address of the target interface (on the host computer; default: 192.168.1.115)
 - `--port` : sets the port on which to receive the data, for either direct or multicast UDP configuration
+
+The following entry-points are provided for use with ros2 run (example uses multicast UDP argument):
+
+```
+ros2 run acsense_pubsub publisher --use-mcast
+ros2 run acsense_pubsub listener
+```

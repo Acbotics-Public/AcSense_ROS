@@ -33,7 +33,7 @@ class AcSensePublisher(Node):
         super().__init__("minimal_publisher")
         self.publisher_ = self.create_publisher(AcSenseRawData, "raw_data", 10)
 
-        logger.info(f"Setting up AcSensePublisher")
+        logger.info(f"Setting up AcSense Publisher")
 
         self.bot = UDP_Data_Protocol()
 
@@ -52,6 +52,7 @@ class AcSensePublisher(Node):
             mreq = struct.pack("4s4s", group, socket.inet_aton(args.iface_ip))
             self.sock_aco.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
+        logger.info(f"Launching AcSense Publisher")
         self.run()
 
     def run(self):
