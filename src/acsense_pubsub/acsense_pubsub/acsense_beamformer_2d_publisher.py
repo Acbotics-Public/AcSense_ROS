@@ -12,21 +12,21 @@ import logging
 import argparse
 import traceback
 
-from acbotics_interface.protocols.udp_beamform_raw_protocol import (
-    UDP_Beamform_Raw_Protocol,
+from acbotics_interface.protocols.udp_beamform_2d_protocol import (
+    UDP_Beamform_2D_Protocol,
 )
 
 
-class AcSenseBeamformRawPublisher(Node):
+class AcSenseBeamform2DPublisher(Node):
     def __init__(self, args):
-        super().__init__("minimal_beamformer_raw_publisher")
+        super().__init__("minimal_beamformer_2d_publisher")
         self.publisher_ = self.create_publisher(
             AcSenseBeamformerData, "beamformer_data", 1
         )
 
-        self.get_logger().info(f"Setting up AcSense Beamformer:Raw Publisher")
+        self.get_logger().info(f"Setting up AcSense Beamformer:2D Publisher")
 
-        self.bot = UDP_Beamform_Raw_Protocol()
+        self.bot = UDP_Beamform_2D_Protocol()
 
         self.sock_aco = socket.socket(
             socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP
@@ -43,41 +43,16 @@ class AcSenseBeamformRawPublisher(Node):
             mreq = struct.pack("4s4s", group, socket.inet_aton(args.iface_ip))
             self.sock_aco.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
-        self.get_logger().info(f"Launching AcSense Beamformer:Raw Publisher")
+        self.get_logger().info(f"Launching AcSense Beamformer:2D Publisher")
         self.run()
 
     def run(self):
         new_header = None
-        payload_frames = {}
         while True:
             try:
                 msg = self.sock_aco.recv(65535)
-                if msg[:4] == b"ACBR":
+                if msg[:4] == b"ACB2":
                     new_header = self.bot.decode_header(msg)
-                    payload_frames = {0: msg}
-
-                elif msg[:4] == b"ACBC":
-                    new_cont_header = self.bot.decode_continued_header(msg)
-                    if (
-                        new_header
-                        and new_cont_header
-                        and new_cont_header.PACKET_NUM == new_header.PACKET_NUM
-                    ):
-                        payload_frames.update(
-                            {
-                                new_cont_header.SUB_PACKET_INDEX: self.bot.get_continued_payload(
-                                    msg
-                                )
-                            }
-                        )
-                    else:
-                        payload_frames = {}
-                        new_header = None
-
-                if new_header and len(payload_frames) == new_header.NUM_PACKETS:
-                    msg = b"".join(
-                        [payload_frames[key] for key in range(new_header.NUM_PACKETS)]
-                    )
 
                     dc = self.bot.decode(msg)
 
@@ -134,7 +109,7 @@ def main(args=None):
     rclpy.init(args=args)
 
     parser = argparse.ArgumentParser(
-        prog="AcSense Beamformer:Raw Publisher",
+        prog="AcSense Beamformer:2D Publisher",
         description="Captures UDP data from the Acbotics Beamformer and publishes it into ROS",
         epilog="Need additional support? Contact Acbotics Research LLC (support@acbotics.com)",
     )
@@ -155,7 +130,7 @@ def main(args=None):
         force=True,
     )
 
-    acsense_publisher = AcSenseBeamformRawPublisher(args)
+    acsense_publisher = AcSenseBeamform2DPublisher(args)
 
     rclpy.spin(acsense_publisher)
 

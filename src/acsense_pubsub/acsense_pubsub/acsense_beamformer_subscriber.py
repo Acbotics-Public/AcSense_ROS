@@ -3,16 +3,19 @@ import rclpy
 from rclpy.node import Node
 
 from acsense_ros_interfaces.msg import (
-    AcSenseBeamformerRaw,
+    AcSenseBeamformerData,
 )
 
 
 class MinimalBeamformerRawSubscriber(Node):
     def __init__(self):
-        super().__init__("minimal_beamformer_raw_subscriber")
-        self.get_logger().info(f"Setting up AcSense Raw Subscriber")
+        super().__init__("minimal_beamformer_subscriber")
+        self.get_logger().info(f"Setting up AcSense Beamformer Data Subscriber")
         self.subscription = self.create_subscription(
-            AcSenseBeamformerRaw, "beamformer_raw", self.listener_callback, 10  # CHANGE
+            AcSenseBeamformerData,
+            "beamformer_data",
+            self.listener_callback,
+            10,  # CHANGE
         )
 
     def listener_callback(self, msg):

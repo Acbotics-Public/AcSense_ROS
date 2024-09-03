@@ -12,7 +12,6 @@ float64 xform_roll
 float64 xform_yaw
 char mode
 char weighting_type
-uint32 num_subpackets
 uint32 packet_num
 float64[] element_x
 float64[] element_y

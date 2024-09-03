@@ -22,7 +22,8 @@ setup(
             "ac_publisher = acsense_pubsub.acsense_raw_publisher:main",
             "ac_subscriber = acsense_pubsub.acsense_raw_subscriber:main",
             "beamformer_raw_publisher = acsense_pubsub.acsense_beamformer_raw_publisher:main",
-            "beamformer_raw_subscriber = acsense_pubsub.acsense_beamformer_raw_subscriber:main",
+            "beamformer_2d_publisher = acsense_pubsub.acsense_beamformer_2d_publisher:main",
+            "beamformer_subscriber = acsense_pubsub.acsense_beamformer_subscriber:main",
         ],
     },
 )
