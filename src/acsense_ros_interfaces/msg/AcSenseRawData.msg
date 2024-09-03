@@ -3,7 +3,8 @@ int8 ver_min
 int8 num_channels
 int8 data_size
 uint32 num_values
-uint32 sample_rate
+uint32 sample_rate_int
+float32 sample_rate_float
 int64 start_time
 uint32 adc_count
 float64 scale

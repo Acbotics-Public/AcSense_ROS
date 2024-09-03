@@ -16,24 +16,16 @@ import traceback
 
 from acbotics_interface.protocols.udp_data_protocol import UDP_Data_Protocol
 
-logging.basicConfig(
-    # format="[%(asctime)s] %(name)s.%(funcName)s() : \n\t%(message)s",
-    format="[%(asctime)s] %(levelname)s: %(filename)s:L%(lineno)d : %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    level=logging.DEBUG,
-    # level=logging.INFO,
-    force=True,
-)
 
 logger = logging.getLogger(__name__)
 
 
-class AcSensePublisher(Node):
+class AcSenseRawPublisher(Node):
     def __init__(self, args):
-        super().__init__("minimal_publisher")
+        super().__init__("minimal_ac_publisher")
         self.publisher_ = self.create_publisher(AcSenseRawData, "raw_data", 10)
 
-        logger.info(f"Setting up AcSense Publisher")
+        logger.info(f"Setting up AcSense Raw Publisher")
 
         self.bot = UDP_Data_Protocol()
 
@@ -52,7 +44,7 @@ class AcSensePublisher(Node):
             mreq = struct.pack("4s4s", group, socket.inet_aton(args.iface_ip))
             self.sock_aco.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
-        logger.info(f"Launching AcSense Publisher")
+        logger.info(f"Launching AcSense Raw Publisher")
         self.run()
 
     def run(self):
@@ -70,7 +62,11 @@ class AcSensePublisher(Node):
                 msg.num_channels = new_header.NUM_CHANNELS
                 msg.data_size = new_header.DATA_SIZE
                 msg.num_values = new_header.NUM_VALUES
-                msg.sample_rate = new_header.SAMPLE_RATE
+                if type(new_header.SAMPLE_RATE) == int:
+                    msg.sample_rate_int = new_header.SAMPLE_RATE
+                else:
+                    msg.sample_rate_float = new_header.SAMPLE_RATE
+
                 msg.start_time = new_header.START_TIME
                 msg.adc_count = new_header.ADC_COUNT
                 msg.scale = new_header.SCALE
@@ -119,11 +115,20 @@ def main(args=None):
     parser.add_argument("--mcast-group", default="224.1.1.1")
     parser.add_argument("--iface-ip", default="192.168.1.115")
     parser.add_argument("--port", type=int, default=9760)
+    parser.add_argument("--debug", action="store_true")
 
     # args = parser.parse_args()
     args, unknown = parser.parse_known_args()
 
-    acsense_publisher = AcSensePublisher(args)
+    logging.basicConfig(
+        # format="[%(asctime)s] %(name)s.%(funcName)s() : \n\t%(message)s",
+        format="[%(asctime)s] %(levelname)s: %(filename)s:L%(lineno)d : %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        level=logging.DEBUG if args.debug else logging.INFO,
+        force=True,
+    )
+
+    acsense_publisher = AcSenseRawPublisher(args)
 
     rclpy.spin(acsense_publisher)
 

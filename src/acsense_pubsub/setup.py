@@ -4,7 +4,7 @@ package_name = "acsense_pubsub"
 
 setup(
     name=package_name,
-    version="0.0.1",
+    version="0.0.2",
     packages=find_packages(exclude=["test"]),
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
@@ -19,8 +19,10 @@ setup(
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
-            "publisher = acsense_pubsub.acsense_publisher:main",
-            "listener = acsense_pubsub.acsense_subscriber:main",
+            "ac_publisher = acsense_pubsub.acsense_raw_publisher:main",
+            "ac_subscriber = acsense_pubsub.acsense_raw_subscriber:main",
+            "beamformer_raw_publisher = acsense_pubsub.acsense_beamformer_raw_publisher:main",
+            "beamformer_raw_subscriber = acsense_pubsub.acsense_beamformer_raw_subscriber:main",
         ],
     },
 )
