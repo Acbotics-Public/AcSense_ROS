@@ -1,18 +1,20 @@
-import rclpy
-from rclpy.node import Node
+import rclpy  # type: ignore
+from rclpy.node import Node  # type: ignore
 
-from acsense_ros_interfaces.msg import (
+from acsense_ros_interfaces.msg import (  # type: ignore
     AcSenseRawData,
-    AcSenseRawDataSingleChannel,
 )
 
 
 class MinimalRawSubscriber(Node):
     def __init__(self):
         super().__init__("minimal_ac_subscriber")
-        self.get_logger().info(f"Setting up AcSense Raw Subscriber")
+        self.get_logger().info("Setting up AcSense Raw Subscriber")
         self.subscription = self.create_subscription(
-            AcSenseRawData, "raw_data", self.listener_callback, 10  # CHANGE
+            AcSenseRawData,
+            "raw_data",
+            self.listener_callback,
+            10,  # CHANGE
         )
 
     def listener_callback(self, msg):

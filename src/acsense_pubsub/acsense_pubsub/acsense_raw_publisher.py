@@ -1,21 +1,17 @@
-import rclpy
-from rclpy.node import Node
+import argparse
+import logging
+import socket
+import struct
+import traceback
 
-from std_msgs.msg import String
-from acsense_ros_interfaces.msg import (
+import rclpy  # type: ignore
+from acbotics_interface.protocols.udp_data_protocol import UDP_Data_Protocol
+from rclpy.node import Node  # type: ignore
+
+from acsense_ros_interfaces.msg import (  # type: ignore
     AcSenseRawData,
     AcSenseRawDataSingleChannel,
 )
-
-import socket
-import struct
-import logging
-
-import argparse
-import traceback
-
-from acbotics_interface.protocols.udp_data_protocol import UDP_Data_Protocol
-
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +21,7 @@ class AcSenseRawPublisher(Node):
         super().__init__("minimal_ac_publisher")
         self.publisher_ = self.create_publisher(AcSenseRawData, "raw_data", 10)
 
-        logger.info(f"Setting up AcSense Raw Publisher")
+        logger.info("Setting up AcSense Raw Publisher")
 
         self.bot = UDP_Data_Protocol()
 
@@ -44,7 +40,7 @@ class AcSenseRawPublisher(Node):
             mreq = struct.pack("4s4s", group, socket.inet_aton(args.iface_ip))
             self.sock_aco.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
-        logger.info(f"Launching AcSense Raw Publisher")
+        logger.info("Launching AcSense Raw Publisher")
         self.run()
 
     def run(self):
@@ -62,7 +58,7 @@ class AcSenseRawPublisher(Node):
                 msg.num_channels = new_header.NUM_CHANNELS
                 msg.data_size = new_header.DATA_SIZE
                 msg.num_values = new_header.NUM_VALUES
-                if type(new_header.SAMPLE_RATE) == int:
+                if type(new_header.SAMPLE_RATE) is int:
                     msg.sample_rate_int = new_header.SAMPLE_RATE
                 else:
                     msg.sample_rate_float = new_header.SAMPLE_RATE
@@ -111,9 +107,9 @@ def main(args=None):
         description="Captures UDP data from the AcSense and publishes it into ROS",
         epilog="Need additional support? Contact Acbotics Research LLC (support@acbotics.com)",
     )
-    parser.add_argument("--use-mcast", action="store_true")
-    parser.add_argument("--mcast-group", default="224.1.1.1")
-    parser.add_argument("--iface-ip", default="192.168.1.115")
+    parser.add_argument("--use_mcast", action="store_true")
+    parser.add_argument("--mcast_group", default="224.1.1.1")
+    parser.add_argument("--iface_ip", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=9760)
     parser.add_argument("--debug", action="store_true")
 

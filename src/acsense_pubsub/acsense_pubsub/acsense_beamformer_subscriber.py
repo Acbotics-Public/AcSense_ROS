@@ -1,8 +1,8 @@
 import numpy as np
-import rclpy
-from rclpy.node import Node
+import rclpy  # type: ignore
+from rclpy.node import Node  # type: ignore
 
-from acsense_ros_interfaces.msg import (
+from acsense_ros_interfaces.msg import (  # type: ignore
     AcSenseBeamformerData,
 )
 
@@ -10,7 +10,7 @@ from acsense_ros_interfaces.msg import (
 class MinimalBeamformerRawSubscriber(Node):
     def __init__(self):
         super().__init__("minimal_beamformer_subscriber")
-        self.get_logger().info(f"Setting up AcSense Beamformer Data Subscriber")
+        self.get_logger().info("Setting up AcSense Beamformer Data Subscriber")
         self.subscription = self.create_subscription(
             AcSenseBeamformerData,
             "beamformer_data",

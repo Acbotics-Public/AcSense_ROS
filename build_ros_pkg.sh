@@ -21,11 +21,11 @@ cp -r $ROOTDIR/submodules/acbotics_interface/src/acbotics_interface $ROOTDIR/src
 
 # Get rosdep dependencies
 # rosdep install -i --from-path src --rosdistro humble -y
-rosdep install -i --from-path src -y
+rosdep install -i --from-path src -y || exit 1
 
 # Run colcon build
-colcon build --packages-select acsense_ros_interfaces
-colcon build --packages-select acsense_pubsub
+colcon build --packages-select acsense_ros_interfaces || exit 1
+colcon build --packages-select acsense_pubsub || exit 1
 
 echo ""
 echo "===================="
@@ -39,6 +39,6 @@ echo "  ros2 run acsense_pubsub ac_publisher"
 echo "  ros2 run acsense_pubsub ac_subscriber"
 echo ""
 echo "Beamformer Data"
-echo "  ros2 run acsense_pubsub beamform_raw_publisher  (for mode: raw)"
-echo "  ros2 run acsense_pubsub beamform_2d_publisher   (for mode: mean, max)"
-echo "  ros2 run acsense_pubsub beamform_subscriber"
+echo "  ros2 run acsense_pubsub beamformer_raw_publisher  (for mode: raw)"
+echo "  ros2 run acsense_pubsub beamformer_2d_publisher   (for mode: mean, max)"
+echo "  ros2 run acsense_pubsub beamformer_subscriber"

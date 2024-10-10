@@ -1,19 +1,17 @@
-import rclpy
-from rclpy.node import Node
-
-from acsense_ros_interfaces.msg import (
-    AcSenseBeamformerData,
-)
-
+import argparse
+import logging
 import socket
 import struct
-import logging
-
-import argparse
 import traceback
 
+import rclpy  # type: ignore
 from acbotics_interface.protocols.udp_beamform_raw_protocol import (
     UDP_Beamform_Raw_Protocol,
+)
+from rclpy.node import Node  # type: ignore
+
+from acsense_ros_interfaces.msg import (  # type: ignore
+    AcSenseBeamformerData,
 )
 
 
@@ -24,7 +22,7 @@ class AcSenseBeamformRawPublisher(Node):
             AcSenseBeamformerData, "beamformer_data", 1
         )
 
-        self.get_logger().info(f"Setting up AcSense Beamformer:Raw Publisher")
+        self.get_logger().info("Setting up AcSense Beamformer:Raw Publisher")
 
         self.bot = UDP_Beamform_Raw_Protocol()
 
@@ -43,7 +41,7 @@ class AcSenseBeamformRawPublisher(Node):
             mreq = struct.pack("4s4s", group, socket.inet_aton(args.iface_ip))
             self.sock_aco.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
-        self.get_logger().info(f"Launching AcSense Beamformer:Raw Publisher")
+        self.get_logger().info("Launching AcSense Beamformer:Raw Publisher")
         self.run()
 
     def run(self):
@@ -138,9 +136,9 @@ def main(args=None):
         description="Captures UDP data from the Acbotics Beamformer and publishes it into ROS",
         epilog="Need additional support? Contact Acbotics Research LLC (support@acbotics.com)",
     )
-    parser.add_argument("--use-mcast", action="store_true")
-    parser.add_argument("--mcast-group", default="224.1.1.1")
-    parser.add_argument("--iface-ip", default="192.168.1.115")
+    parser.add_argument("--use_mcast", action="store_true")
+    parser.add_argument("--mcast_group", default="224.1.1.1")
+    parser.add_argument("--iface_ip", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=9765)
     parser.add_argument("--debug", action="store_true")
 

@@ -1,19 +1,17 @@
-import rclpy
-from rclpy.node import Node
-
-from acsense_ros_interfaces.msg import (
-    AcSenseBeamformerData,
-)
-
+import argparse
+import logging
 import socket
 import struct
-import logging
-
-import argparse
 import traceback
 
+import rclpy  # type: ignore
 from acbotics_interface.protocols.udp_beamform_2d_protocol import (
     UDP_Beamform_2D_Protocol,
+)
+from rclpy.node import Node  # type: ignore
+
+from acsense_ros_interfaces.msg import (  # type: ignore
+    AcSenseBeamformerData,
 )
 
 
@@ -24,7 +22,7 @@ class AcSenseBeamform2DPublisher(Node):
             AcSenseBeamformerData, "beamformer_data", 1
         )
 
-        self.get_logger().info(f"Setting up AcSense Beamformer:2D Publisher")
+        self.get_logger().info("Setting up AcSense Beamformer:2D Publisher")
 
         self.bot = UDP_Beamform_2D_Protocol()
 
@@ -43,7 +41,7 @@ class AcSenseBeamform2DPublisher(Node):
             mreq = struct.pack("4s4s", group, socket.inet_aton(args.iface_ip))
             self.sock_aco.setsockopt(socket.IPPROTO_IP, socket.IP_ADD_MEMBERSHIP, mreq)
 
-        self.get_logger().info(f"Launching AcSense Beamformer:2D Publisher")
+        self.get_logger().info("Launching AcSense Beamformer:2D Publisher")
         self.run()
 
     def run(self):
@@ -90,7 +88,11 @@ class AcSenseBeamform2DPublisher(Node):
                     msg.bearings = dc.thetas.tolist()
                     msg.elevations = dc.phis.tolist()
                     msg.beamformer_response = dc.data.flatten().tolist()
-                    msg.shape = dc.data.shape
+
+                    # In 2D, frequency components are combined into single layer;
+                    # but beampattern dimensions expected as:
+                    # <n_bearings, n_elevations, n_frequencies>
+                    msg.shape = tuple(list(dc.data.shape) + [1])
 
                     self.publisher_.publish(msg)
 
@@ -113,9 +115,9 @@ def main(args=None):
         description="Captures UDP data from the Acbotics Beamformer and publishes it into ROS",
         epilog="Need additional support? Contact Acbotics Research LLC (support@acbotics.com)",
     )
-    parser.add_argument("--use-mcast", action="store_true")
-    parser.add_argument("--mcast-group", default="224.1.1.1")
-    parser.add_argument("--iface-ip", default="192.168.1.115")
+    parser.add_argument("--use_mcast", action="store_true")
+    parser.add_argument("--mcast_group", default="224.1.1.1")
+    parser.add_argument("--iface_ip", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=9765)
     parser.add_argument("--debug", action="store_true")
 
