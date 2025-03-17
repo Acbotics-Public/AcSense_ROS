@@ -18,6 +18,11 @@ DOCKER_IMAGE_URL=localhost:5000/${DOCKER_IMAGE_NAME}
 
 VERSION=0.0.1
 
+docker run --rm --privileged multiarch/qemu-user-static:register --reset 2&> /dev/null
+sleep 1
+docker run --rm --privileged multiarch/qemu-user-static --reset -p yes -c yes 2&> /dev/null
+sleep 1
+
 # Execute x86_64 build and load locally
 docker buildx build \
     --platform linux/amd64  \
@@ -35,6 +40,9 @@ docker buildx build \
     --tag ${DOCKER_IMAGE_URL}:latest \
     --push \
     .
+
+docker run --rm --privileged multiarch/qemu-user-static:register --reset 2&> /dev/null
+sleep 1
 
 echo "Done"
 

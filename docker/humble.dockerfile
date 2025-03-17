@@ -1,5 +1,7 @@
 FROM ros:humble-ros-base AS base
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 # For some reason, adding the linux/arm64 variant causes issues with libc-bin
 # The patch below is based on the following Stack Overflow posts:
 # https://stackoverflow.com/questions/78105004/docker-build-fails-because-unable-to-install-libc-bin
@@ -7,7 +9,10 @@ FROM ros:humble-ros-base AS base
 RUN rm /var/lib/dpkg/info/libc-bin.* \
     && apt clean \
     && apt update \
-    && apt install libc-bin
+    && apt install -y apt-utils \
+    && apt install -f \
+    && dpkg --configure -a \
+    && apt install -y libc-bin
 
 RUN apt update \
     && apt upgrade -y
@@ -23,6 +28,11 @@ RUN cp /acsense_ros/docker/ros_entrypoint.sh /
 
 # Use ros-core in final stage for smaller image
 FROM ros:humble-ros-core
+
+RUN apt update \
+    && apt upgrade -y
+RUN /ros_entrypoint.sh apt install -y \
+    python3-matplotlib
 
 COPY --from=base /acsense_ros/install /acsense_ros
 COPY --from=base /ros_entrypoint.sh /ros_entrypoint.sh

@@ -42,9 +42,10 @@ to ensure the container can see the data received from the AcSense, and set the 
 necessary.
 
 ```bash
-docker run -it --net host --name acsense_ros -e ROS_DOMAIN_ID=1 acsense_ros
-
-ros2 run acsense_pubsub beamformer_2d_publisher --use_mcast
+docker run -it --rm --net host --name acsense_ros \
+    -e ROS_DOMAIN_ID=1 \
+    acsense_ros \
+    ros2 run acsense_pubsub beamformer_2d_publisher --use_mcast
 ```
 
 The example beamformer data subscriber can then be launched on the same container, or an independent container
@@ -52,10 +53,43 @@ with a matching `ROS_DOMAIN_ID` value.
 
 ```bash
 # In same container
-docker exec -it acsense_ros /ros_entrypoint.sh ros2 run acsense_pubsub beamformer_subscriber
+docker exec -it acsense_ros /ros_entrypoint.sh \
+    ros2 run acsense_pubsub beamformer_subscriber
 
 # In separate container
-docker run -it --rm --name test -e ROS_DOMAIN_ID=1 acsense_ros
-
-ros2 run acsense_pubsub beamformer_subscriber
+docker run -it --rm --name test \
+    -e ROS_DOMAIN_ID=1 \
+    acsense_ros \
+    ros2 run acsense_pubsub beamformer_subscriber
 ```
+
+## Visualizing the data stream
+
+The `beamformer_subscriber` provides a basic stream visualization feature,
+using `matplotlib`. Though not intended for use in deployment, this feature
+provides a simple and convenient mechanism to test and validate the system
+during development.
+
+In one terminal screen, launch the publisher:
+
+```bash
+# Use Xauthority and DISPLAY passthrough to enable graphics from container
+docker run -it --rm --net host --name acsense_ros \
+    -e ROS_DOMAIN_ID=1 \
+    --volume /run/user/${UID}/gdm/Xauthority:/root/.Xauthority:rw \
+    -e DISPLAY=${DISPLAY} \
+    acsense_ros \
+    ros2 run acsense_pubsub beamformer_2d_publisher --use_mcast
+```
+In another terminal screen, launch the subscriber with the `--plot` argument:
+
+```bash
+# Running in same container as publisher:
+docker exec -it acsense_ros /ros_entrypoint.sh \
+    ros2 run acsense_pubsub beamformer_subscriber --plot
+```
+
+The plot will render the 2D beamformer response, per the bearing & elevation angles
+evaluated by the beamformer. The 2D data is also compressed into bearing-only 1D
+rasters, which are plotted in an additional waterfall plot to illustrate the response
+history over the most recent frames.
